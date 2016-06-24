@@ -1,6 +1,7 @@
 package com.wsheikh.simpletodo;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+  static SQLiteDatabase db;
+
   private static final int REQUEST_CODE = 200;
 
   private ListView lvItems;
@@ -32,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     lvItems = (ListView) findViewById(R.id.lvItems);
     etNewItem = (EditText) findViewById(R.id.etNewItem);
+
+    SimpleTodoDatabaseHelper dbHelper = new SimpleTodoDatabaseHelper(this);
+    db = dbHelper.getWritableDatabase();
     populateItems();
     setupListViewListeners();
   }
