@@ -4,7 +4,7 @@
 
 Submitted by: **Wahab Sheikh**
 
-Time spent: **3** hours spent so far
+Time spent: **4** hours spent so far
 
 ## User Stories
 
