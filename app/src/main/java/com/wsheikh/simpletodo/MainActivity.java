@@ -1,6 +1,7 @@
 package com.wsheikh.simpletodo;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,20 +11,22 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
+import nl.qbusict.cupboard.QueryResultIterable;
+import static nl.qbusict.cupboard.CupboardFactory.cupboard;
+
 public class MainActivity extends AppCompatActivity {
+
+  static SQLiteDatabase db;
 
   private static final int REQUEST_CODE = 200;
 
   private ListView lvItems;
   private EditText etNewItem;
 
-  private ArrayList<String> items;
+  private ArrayList<TodoItem> items;
+  private ArrayList<String> itemNames;
   private ArrayAdapter<String> itemsAdapter;
 
   @Override
@@ -32,37 +35,44 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     lvItems = (ListView) findViewById(R.id.lvItems);
     etNewItem = (EditText) findViewById(R.id.etNewItem);
+
+    SimpleTodoDatabaseHelper dbHelper = new SimpleTodoDatabaseHelper(this);
+    db = dbHelper.getWritableDatabase();
     populateItems();
     setupListViewListeners();
   }
 
   public void onAddItem(View v) {
-    String itemText = etNewItem.getText().toString();
-    itemsAdapter.add(itemText);
+    TodoItem item = new TodoItem(etNewItem.getText().toString());
+    cupboard().withDatabase(db).put(item);
+    items.add(item);
+    itemsAdapter.add(item.getName());
+    itemsAdapter.notifyDataSetChanged();
     etNewItem.setText("");
-    writeItems();
   }
 
   private void populateItems() {
     readItems();
-    itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+    itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, itemNames);
     lvItems.setAdapter(itemsAdapter);
   }
 
   private void setupListViewListeners() {
     lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
       @Override
-      public boolean onItemLongClick(AdapterView<?> adapterView, View item, int position, long id) {
+      public boolean onItemLongClick(AdapterView<?> adapterView, View itemView, int position, long id) {
+        TodoItem item = items.get(position);
+        cupboard().withDatabase(db).delete(TodoItem.class, item.get_id());
         items.remove(position);
+        itemNames.remove(position);
         itemsAdapter.notifyDataSetChanged();
-        writeItems();
         return true;
       }
     });
 
     lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
-      public void onItemClick(AdapterView<?> adapterView, View item, int position, long id) {
+      public void onItemClick(AdapterView<?> adapterView, View itemView, int position, long id) {
         launchEditView(position);
       }
     });
@@ -72,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
   public void launchEditView(int position) {
     Intent i = new Intent(this, EditItemActivity.class);
     i.putExtra("itemPosition", position);
-    i.putExtra("itemText", items.get(position));
+    i.putExtra("itemText", itemNames.get(position));
     startActivityForResult(i, REQUEST_CODE);
   }
 
@@ -80,31 +90,26 @@ public class MainActivity extends AppCompatActivity {
     if (requestCode == REQUEST_CODE && resultCode == EditItemActivity.RESULT_OK) {
       String newText = data.getExtras().getString("newText");
       int position = data.getExtras().getInt("position", 0);
-      items.set(position, newText);
+      TodoItem item = new TodoItem(newText);
+      cupboard().withDatabase(db).put(item);
+      items.set(position, item);
       itemsAdapter.notifyDataSetChanged();
-      writeItems();
+
       Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
     }
   }
 
   private void readItems() {
-    File filesDir = getFilesDir();
-    File todoFile = new File(filesDir, "todo.txt");
-    try {
-      items = new ArrayList<String>(FileUtils.readLines(todoFile));
-    } catch (IOException e) {
-      items = new ArrayList<String>();
-    }
-  }
 
-  private void writeItems() {
-    File filesDir = getFilesDir();
-    File todoFile = new File(filesDir, "todo.txt");
-    try {
-      FileUtils.writeLines(todoFile, items);
-    } catch (IOException e) {
-      e.printStackTrace();
+    items = new ArrayList<>();
+    itemNames = new ArrayList<>();
+
+    final QueryResultIterable<TodoItem> iter = cupboard().withDatabase(db).query(TodoItem.class).query();
+    for (TodoItem item : iter) {
+      items.add(item);
+      itemNames.add(item.getName());
     }
+    iter.close();
   }
 
 
