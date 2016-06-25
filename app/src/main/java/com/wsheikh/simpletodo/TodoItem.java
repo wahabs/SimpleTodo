@@ -9,15 +9,11 @@ public class TodoItem {
     this.name = name;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void set_id(Long _id) {
-    this._id = _id;
-  }
-
   public Long get_id() {
     return _id;
+  }
+
+  public String toString() {
+    return name;
   }
 }
