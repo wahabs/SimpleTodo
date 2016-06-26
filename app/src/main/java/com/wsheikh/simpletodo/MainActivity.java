@@ -80,14 +80,16 @@ public class MainActivity extends AppCompatActivity {
     Intent i = new Intent(this, EditItemActivity.class);
     i.putExtra("itemPosition", position);
     i.putExtra("itemText", items.get(position).getName());
+    i.putExtra("itemDate", items.get(position).getDueDate());
     startActivityForResult(i, REQUEST_CODE);
   }
 
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_CODE && resultCode == EditItemActivity.RESULT_OK) {
       String newText = data.getExtras().getString("newText");
+      String newDate = data.getExtras().getString("newDate");
       int position = data.getExtras().getInt("position", 0);
-      TodoItem item = new TodoItem(newText, TodoItem.defaultDueDate());
+      TodoItem item = new TodoItem(newText, TodoItem.timeFromDateString(newDate));
       cupboard().withDatabase(db).delete(items.get(position));
       cupboard().withDatabase(db).put(item);
       items.set(position, item);
