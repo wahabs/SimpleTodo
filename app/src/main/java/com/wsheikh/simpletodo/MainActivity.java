@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
       TodoItem item = new TodoItem(newText);
       cupboard().withDatabase(db).put(item);
       items.set(position, item);
+      itemNames.set(position, item.getName());
       itemsAdapter.notifyDataSetChanged();
 
       Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
