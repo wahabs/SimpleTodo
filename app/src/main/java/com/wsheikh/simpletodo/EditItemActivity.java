@@ -9,21 +9,25 @@ import android.widget.EditText;
 public class EditItemActivity extends AppCompatActivity {
 
   public static final int RESULT_OK = 200;
-  private EditText etEditItem;
+  private EditText etEditName;
+  private EditText etEditDate;
   private int itemPosition;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_edit_item);
-    etEditItem = (EditText) findViewById(R.id.etEditItem);
+    etEditName = (EditText) findViewById(R.id.etEditName);
+    etEditDate = (EditText) findViewById(R.id.etEditDate);
     itemPosition = getIntent().getIntExtra("itemPosition", 0);
-    etEditItem.setText(getIntent().getStringExtra("itemText"));
+    etEditName.setText(getIntent().getStringExtra("itemText"));
+    etEditDate.setText(getIntent().getStringExtra("itemDate"));
   }
 
   public void onSaveItem(View v) {
     Intent data = new Intent();
-    data.putExtra("newText", etEditItem.getText().toString());
+    data.putExtra("newText", etEditName.getText().toString());
+    data.putExtra("newDate", etEditDate.getText().toString());
     data.putExtra("position", itemPosition);
     setResult(RESULT_OK, data);
     finish();
