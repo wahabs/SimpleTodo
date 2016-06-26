@@ -6,29 +6,36 @@ import java.util.Calendar;
 
 public class TodoItem {
 
+  private static final String DATE_FORMAT = "MM/dd";
+
   public Long _id;
   public String name;
-  public String dueDate;
+  public long dueDate; // in milliseconds from Unix epoch
 
-  public static String defaultDueDate() {
+  public static long defaultDueDate() {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.DATE, 1);
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-    return formatter.format(c.getTime());
+    return c.getTimeInMillis();
+  }
+
+  public static String formattedDate(long time) {
+    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+    return formatter.format(time);
+  }
+
+  public String getDueDate() {
+    return formattedDate(dueDate);
   }
 
   public TodoItem() {
     this("untitled", defaultDueDate());
   }
 
-  public TodoItem(String name, String dueDate) {
+  public TodoItem(String name, long dueDate) {
     this.name = name;
     this.dueDate = dueDate;
   }
 
-  public String getDueDate() {
-    return dueDate;
-  }
 
   public void setName(String name) {
     this.name = name;
