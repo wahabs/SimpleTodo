@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -14,6 +13,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import nl.qbusict.cupboard.QueryResultIterable;
+
 import static nl.qbusict.cupboard.CupboardFactory.cupboard;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,8 +26,7 @@ public class MainActivity extends AppCompatActivity {
   private EditText etNewItem;
 
   private ArrayList<TodoItem> items;
-  private ArrayList<String> itemNames;
-  private ArrayAdapter<String> itemsAdapter;
+  private TodoItemsAdapter itemsAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +45,13 @@ public class MainActivity extends AppCompatActivity {
     TodoItem item = new TodoItem(etNewItem.getText().toString());
     cupboard().withDatabase(db).put(item);
     items.add(item);
-    itemsAdapter.add(item.getName());
     itemsAdapter.notifyDataSetChanged();
     etNewItem.setText("");
   }
 
   private void populateItems() {
     readItems();
-    itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, itemNames);
+    itemsAdapter = new TodoItemsAdapter(this, items);
     lvItems.setAdapter(itemsAdapter);
   }
 
@@ -64,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         TodoItem item = items.get(position);
         cupboard().withDatabase(db).delete(TodoItem.class, item.get_id());
         items.remove(position);
-        itemNames.remove(position);
         itemsAdapter.notifyDataSetChanged();
         return true;
       }
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
   public void launchEditView(int position) {
     Intent i = new Intent(this, EditItemActivity.class);
     i.putExtra("itemPosition", position);
-    i.putExtra("itemText", itemNames.get(position));
+    i.putExtra("itemText", items.get(position).toString());
     startActivityForResult(i, REQUEST_CODE);
   }
 
@@ -102,12 +99,10 @@ public class MainActivity extends AppCompatActivity {
   private void readItems() {
 
     items = new ArrayList<>();
-    itemNames = new ArrayList<>();
 
     final QueryResultIterable<TodoItem> iter = cupboard().withDatabase(db).query(TodoItem.class).query();
     for (TodoItem item : iter) {
       items.add(item);
-      itemNames.add(item.getName());
     }
     iter.close();
   }
