@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -14,6 +13,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import nl.qbusict.cupboard.QueryResultIterable;
+
 import static nl.qbusict.cupboard.CupboardFactory.cupboard;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
   private EditText etNewItem;
 
   private ArrayList<TodoItem> items;
-  private ArrayAdapter<TodoItem> itemsAdapter;
+  private TodoItemsAdapter itemsAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
   private void populateItems() {
     readItems();
-    itemsAdapter = new ArrayAdapter<TodoItem>(this, android.R.layout.simple_list_item_1, items);
+    itemsAdapter = new TodoItemsAdapter(this, items);
     lvItems.setAdapter(itemsAdapter);
   }
 
