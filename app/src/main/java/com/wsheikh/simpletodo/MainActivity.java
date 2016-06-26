@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void onAddItem(View v) {
-    TodoItem item = new TodoItem(etNewItem.getText().toString());
+    TodoItem item = new TodoItem(etNewItem.getText().toString(), TodoItem.defaultDueDate());
     cupboard().withDatabase(db).put(item);
     items.add(item);
     itemsAdapter.notifyDataSetChanged();
@@ -87,7 +87,8 @@ public class MainActivity extends AppCompatActivity {
     if (requestCode == REQUEST_CODE && resultCode == EditItemActivity.RESULT_OK) {
       String newText = data.getExtras().getString("newText");
       int position = data.getExtras().getInt("position", 0);
-      TodoItem item = new TodoItem(newText);
+      TodoItem item = new TodoItem(newText, TodoItem.defaultDueDate());
+      cupboard().withDatabase(db).delete(items.get(position));
       cupboard().withDatabase(db).put(item);
       items.set(position, item);
       itemsAdapter.notifyDataSetChanged();
