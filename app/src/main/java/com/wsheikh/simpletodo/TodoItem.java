@@ -1,12 +1,14 @@
 package com.wsheikh.simpletodo;
 
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class TodoItem {
 
   private static final String DATE_FORMAT = "MM/dd";
+  private static final String DEFAULT_NAME = "Untitled";
 
   public Long _id;
   public String name;
@@ -18,17 +20,30 @@ public class TodoItem {
     return c.getTimeInMillis();
   }
 
-  public static String formattedDate(long time) {
+  public static String dateStringFromTime(long time) {
     SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     return formatter.format(time);
   }
 
+  public static long timeFromDateString(String dateStr) {
+    Calendar c = Calendar.getInstance();
+    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+
+    try {
+      c.setTime(formatter.parse(dateStr));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+
+    return c.getTimeInMillis();
+  }
+
   public String getDueDate() {
-    return formattedDate(dueDate);
+    return dateStringFromTime(dueDate);
   }
 
   public TodoItem() {
-    this("untitled", defaultDueDate());
+    this(DEFAULT_NAME, defaultDueDate());
   }
 
   public TodoItem(String name, long dueDate) {
